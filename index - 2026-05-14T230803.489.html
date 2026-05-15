@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Facilita Cell</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--blue:#1565C0;--blue2:#1976D2;--blue3:#0D1B3E;--green:#2E7D32;--green2:#43A047;--green3:#E8F5E9;--red:#D32F2F;--orange:#FF8C00}
+body{font-family:'Open Sans',sans-serif;background:var(--blue);min-height:100vh;display:flex;align-items:center;justify-content:center}
+
+.screen{display:none;width:100%;max-width:430px;min-height:100vh;flex-direction:column;align-items:center;background:var(--blue);padding:0 0 32px;animation:fadeIn .35s ease}
+.screen.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
+.logo-wrap{background:var(--blue3);border-radius:16px;padding:10px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,.35)}
+.logo-phone-box{background:var(--orange);border-radius:10px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-brand{display:flex;flex-direction:column;line-height:1;gap:1px}
+.logo-brand .l1{font-family:'Montserrat',sans-serif;font-weight:900;font-size:21px;color:var(--orange);letter-spacing:1px}
+.logo-brand .l2{font-family:'Montserrat',sans-serif;font-weight:900;font-size:21px;color:#fff;letter-spacing:1px}
+.logo-box{display:flex;flex-direction:column;align-items:center;padding:28px 20px 0}
+
+.hero-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:52px;color:#fff;text-align:center;line-height:1;margin:26px 20px 12px;text-transform:uppercase;letter-spacing:-1px;text-shadow:0 3px 12px rgba(0,0,0,.2)}
+.red-banner{background:#D32F2F;color:#fff;font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px;letter-spacing:1.5px;padding:10px 28px;text-align:center;width:90%;max-width:340px;border-radius:3px;margin-bottom:20px}
+.subtitle{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;color:#fff;text-align:center;margin-bottom:4px}
+
+.form-card{width:90%;max-width:345px;background:var(--blue2);border-radius:14px;padding:20px;margin-top:16px;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+.field-label{font-size:11px;font-weight:700;letter-spacing:1.2px;color:rgba(255,255,255,.7);text-transform:uppercase;margin-bottom:5px}
+.field-input{width:100%;background:#fff;border:2px solid transparent;border-radius:8px;padding:12px 14px;font-size:15px;color:#333;outline:none;margin-bottom:13px;font-family:'Open Sans',sans-serif;transition:border-color .2s}
+.field-input::placeholder{color:#aaa}
+.field-input.error{border-color:#EF5350!important;background:#fff8f8}
+.btn-green{width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:16px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s,transform .1s;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.btn-green:hover{background:#1B5E20}.btn-green:active{transform:scale(.98)}
+.footer-text{font-size:10px;color:rgba(255,255,255,.45);text-align:center;padding:16px 20px 0;line-height:1.7}
+/* Admin access - discreto: triple-click no ano */
+.footer-year{cursor:default;user-select:none}
+
+#screen-loading{justify-content:center;padding-top:28px}
+.analyst-svg-wrap{width:260px;height:280px;margin:0 auto 8px;position:relative}
+@keyframes floatFig{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes swingGlass{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes barPulse1{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.55)}}
+@keyframes barPulse2{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.7)}}
+@keyframes barPulse3{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.45)}}
+@keyframes barPulse4{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.8)}}
+@keyframes barPulse5{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.6)}}
+@keyframes scanGlass{0%{transform:translateY(-62px);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(62px);opacity:0}}
+@keyframes floatA{0%,100%{transform:translate(0,0);opacity:.8}50%{transform:translate(4px,-8px);opacity:1}}
+@keyframes floatB{0%,100%{transform:translate(0,0);opacity:.6}50%{transform:translate(-6px,-6px);opacity:1}}
+@keyframes floatC{0%,100%{transform:translate(0,0);opacity:.7}50%{transform:translate(5px,-5px);opacity:.9}}
+@keyframes blinkDot{0%,100%{opacity:.3}50%{opacity:1}}
+@keyframes linePulse{0%,100%{stroke-dashoffset:0}50%{stroke-dashoffset:30}}
+.spinner{width:20px;height:20px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:19px;color:#fff;letter-spacing:1px;margin-bottom:4px;text-align:center}
+.loading-sub{font-size:11px;color:rgba(255,255,255,.6);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;text-align:center}
+.loading-pill{background:rgba(255,255,255,.15);border-radius:30px;padding:11px 20px;display:flex;align-items:center;gap:10px;color:#fff;font-size:13px;font-weight:600;max-width:310px}
+.progress-bar-wrap{width:88%;max-width:290px;height:5px;background:rgba(255,255,255,.15);border-radius:10px;margin:14px auto 0;overflow:hidden}
+.progress-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#42A5F5,#66BB6A);border-radius:10px;transition:width .35s ease}
+.cpf-scan{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;color:rgba(255,255,255,.85);letter-spacing:4px;margin:10px 0 4px;text-align:center}
+.cpf-scan span{display:inline-block;opacity:0;animation:revealDigit .15s forwards}
+@keyframes revealDigit{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+#screen-result{background:#f5f7fa}
+.result-header{width:100%;background:var(--blue);display:flex;align-items:center;justify-content:center;padding:18px 16px}
+.result-body{display:flex;flex-direction:column;align-items:center;padding:24px 16px 36px;width:100%;max-width:430px;background:#f5f7fa}
+.mascot-wrap{width:220px;margin-bottom:10px;display:flex;justify-content:center}
+.approved-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:30px;color:var(--blue);text-align:center;text-transform:uppercase;line-height:1.15;margin-bottom:4px}
+.party-emoji{font-size:24px;margin-bottom:14px}
+.limit-badge{background:var(--green3);border:2px solid var(--green2);border-radius:30px;padding:10px 22px;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.limit-badge .dot{width:10px;height:10px;background:var(--green2);border-radius:50%}
+.limit-badge-text{font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;color:var(--green)}
+.limit-badge-text strong{font-size:19px;color:#1B5E20}
+.validity-pill{background:var(--green2);color:#fff;border-radius:20px;padding:6px 16px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.countdown-wrap{font-size:11px;color:#888;margin-bottom:14px;text-align:center}
+.countdown-timer{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;color:var(--red)}
+
+.schedule-box{width:100%;max-width:345px;background:var(--blue2);border-radius:14px;padding:18px 16px;margin-bottom:14px}
+.schedule-title{font-family:'Montserrat',sans-serif;font-weight:800;font-size:12px;color:rgba(255,255,255,.85);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.days-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
+.day-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:8px 4px;cursor:pointer;text-align:center;transition:all .2s}
+.day-btn:hover{background:rgba(255,255,255,.25)}.day-btn.selected{background:#fff;border-color:#fff}
+.day-btn .day-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;color:rgba(255,255,255,.7);text-transform:uppercase;display:block}
+.day-btn.selected .day-name,.day-btn.selected .day-num,.day-btn.selected .day-month{color:var(--blue)}
+.day-btn .day-num{font-family:'Montserrat',sans-serif;font-weight:900;font-size:18px;color:#fff;display:block;line-height:1.1}
+.day-btn .day-month{font-size:10px;color:rgba(255,255,255,.6);display:block}
+.time-picker{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px}
+.time-col{display:flex;flex-direction:column;align-items:center;gap:4px}
+.time-arrow{background:rgba(255,255,255,.18);border:none;border-radius:8px;width:46px;height:32px;color:#fff;font-size:16px;cursor:pointer;transition:background .15s}
+.time-arrow:hover{background:rgba(255,255,255,.32)}.time-arrow:active{transform:scale(.96)}
+.time-display{background:#fff;color:var(--blue);font-family:'Montserrat',sans-serif;font-weight:900;font-size:32px;border-radius:10px;width:72px;height:58px;display:flex;align-items:center;justify-content:center;letter-spacing:1px;box-shadow:0 3px 12px rgba(0,0,0,.18)}
+.time-sep{font-family:'Montserrat',sans-serif;font-weight:900;font-size:34px;color:#fff;margin-bottom:22px}
+.time-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:600}
+.schedule-hint{font-size:11px;color:rgba(255,255,255,.55);text-align:center;margin-top:8px}
+.atendimento-note{font-size:10.5px;color:rgba(255,255,255,.4);text-align:center;margin-top:6px;line-height:1.5}
+.result-desc{font-size:14px;color:#555;text-align:center;line-height:1.65;margin-bottom:16px;max-width:300px}
+.result-desc strong{color:var(--blue)}
+.btn-whatsapp{width:100%;max-width:345px;background:#25D366;color:#fff;border:none;border-radius:12px;padding:16px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .2s,transform .1s;box-shadow:0 4px 16px rgba(37,211,102,.35);text-decoration:none}
+.btn-whatsapp:hover{background:#128C7E}.btn-whatsapp:active{transform:scale(.98)}
+.btn-whatsapp.disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+
+#screen-confirm{background:#f5f7fa}
+.confirm-body{display:flex;flex-direction:column;align-items:center;padding:32px 20px 40px;width:100%}
+.confirm-icon{width:80px;height:80px;background:#E8F5E9;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;margin-bottom:16px;border:3px solid var(--green2)}
+.confirm-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:24px;color:var(--green);text-align:center;margin-bottom:8px}
+.confirm-card{background:#fff;border-radius:14px;width:100%;max-width:345px;padding:18px;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:18px}
+.confirm-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px}
+.confirm-row:last-child{border-bottom:none}
+.confirm-row .lbl{color:#888;font-size:13px}
+.confirm-row .val{font-weight:700;color:#222;font-family:'Montserrat',sans-serif;font-size:14px;text-align:right}
+.confirm-row .val.green{color:var(--green)}
+.btn-outline{width:100%;max-width:345px;background:transparent;color:var(--blue);border:2px solid var(--blue);border-radius:12px;padding:14px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:all .2s;margin-top:8px}
+.btn-outline:hover{background:var(--blue);color:#fff}
+
+/* ADMIN LOGIN - discreto, fundo escuro sem chamar atenção */
+#admin-login-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;align-items:center;justify-content:center}
+#admin-login-overlay.open{display:flex}
+.login-box{background:#111827;border-radius:16px;padding:32px 24px;width:100%;max-width:300px;text-align:center;border:1px solid rgba(255,255,255,.08)}
+.login-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:18px;color:#fff;margin-bottom:4px}
+.login-sub{font-size:12px;color:rgba(255,255,255,.35);margin-bottom:22px}
+.login-input{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:13px 16px;font-size:16px;color:#fff;outline:none;text-align:center;letter-spacing:6px;font-family:'Montserrat',sans-serif;font-weight:700;margin-bottom:14px}
+.login-input::placeholder{color:rgba(255,255,255,.2);letter-spacing:1px}
+.btn-login{width:100%;background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:13px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;letter-spacing:1px}
+.btn-login:hover{background:rgba(255,255,255,.18)}
+.login-err{color:#EF5350;font-size:12px;margin-top:8px;min-height:18px}
+.login-close{background:none;border:none;color:rgba(255,255,255,.2);font-size:11px;margin-top:14px;cursor:pointer;letter-spacing:1px}
+
+/* ADMIN PANEL */
+#screen-admin{display:none;width:100%;min-height:100vh;background:#f0f2f5;max-width:100%}
+.admin-header{background:#111827;color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;width:100%}
+.admin-header-left{display:flex;align-items:center;gap:10px}
+.admin-logo-dot{width:8px;height:8px;background:var(--orange);border-radius:50%}
+.admin-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:16px;color:rgba(255,255,255,.7)}
+.admin-title span{color:rgba(255,255,255,.35)}
+.admin-tabs{display:flex;background:#fff;border-bottom:1px solid #e8e8e8;width:100%;padding:0 12px}
+.admin-tab{flex:1;padding:13px 4px;text-align:center;font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:#aaa;cursor:pointer;border-bottom:2.5px solid transparent;transition:all .2s;text-transform:uppercase;letter-spacing:.5px}
+.admin-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.admin-content{display:none;width:100%;padding:16px}
+.admin-content.active{display:block}
+
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.stat-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.stat-card .sc-num{font-family:'Montserrat',sans-serif;font-weight:900;font-size:30px;line-height:1}
+.stat-card .sc-lbl{font-size:11px;color:#aaa;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.sc-blue{color:var(--blue)}.sc-green{color:var(--green)}.sc-orange{color:var(--orange)}.sc-red{color:var(--red)}
+
+.analysis-card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:10px;border-left:3px solid #e0e0e0}
+.analysis-card.pendente{border-left-color:#FF9800}
+.analysis-card.confirmado{border-left-color:#4CAF50}
+.analysis-card.recusado{border-left-color:#f44336}
+.ac-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.ac-name{font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;color:#1a1a1a}
+.ac-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;font-family:'Montserrat',sans-serif;white-space:nowrap}
+.ac-badge.pendente{background:#FFF3E0;color:#E65100}
+.ac-badge.confirmado{background:#E8F5E9;color:#2E7D32}
+.ac-badge.recusado{background:#FFEBEE;color:#C62828}
+.ac-info{font-size:12px;color:#666;line-height:1.8}
+.ac-info strong{color:#444;font-weight:600}
+.ac-actions{display:flex;gap:7px;margin-top:10px}
+.ac-btn{flex:1;padding:8px 4px;border:none;border-radius:8px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;cursor:pointer;transition:all .2s;letter-spacing:.3px}
+.ac-btn.confirm{background:#E8F5E9;color:var(--green)}.ac-btn.confirm:hover{background:var(--green);color:#fff}
+.ac-btn.refuse{background:#FFEBEE;color:var(--red)}.ac-btn.refuse:hover{background:var(--red);color:#fff}
+.ac-btn.contact{background:#E3F2FD;color:var(--blue)}.ac-btn.contact:hover{background:var(--blue);color:#fff}
+
+.filter-row{display:flex;gap:7px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+.filter-btn{flex-shrink:0;padding:7px 14px;background:#fff;border:1px solid #ddd;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;color:#888;transition:all .2s;white-space:nowrap}
+.filter-btn.active{background:var(--blue);border-color:var(--blue);color:#fff}
+
+.settings-section{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.settings-section h3{font-family:'Montserrat',sans-serif;font-weight:800;font-size:13px;color:#444;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #f0f0f0}
+.s-label{font-size:11px;font-weight:600;color:#999;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.s-input{width:100%;border:1.5px solid #e8e8e8;border-radius:8px;padding:10px 12px;font-size:14px;color:#333;outline:none;margin-bottom:12px;font-family:'Open Sans',sans-serif;transition:border-color .2s}
+.s-input:focus{border-color:var(--blue)}
+.btn-save{background:var(--blue);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;cursor:pointer;width:100%;transition:background .2s;letter-spacing:.5px}
+.btn-save:hover{background:#0D47A1}
+.btn-danger{background:#fff;color:#C62828;border:1.5px solid #FFCDD2;border-radius:10px;padding:12px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;cursor:pointer;width:100%;margin-top:8px;transition:all .2s}
+.btn-danger:hover{background:#FFEBEE}
+.section-out{background:none;border:none;color:rgba(255,255,255,.4);font-size:11px;cursor:pointer;letter-spacing:.5px;font-family:'Montserrat',sans-serif}
+.section-out:hover{color:rgba(255,255,255,.7)}
+.fb-status{font-size:11px;padding:6px 12px;border-radius:20px;font-weight:600;display:inline-flex;align-items:center;gap:5px;margin-bottom:12px}
+.fb-status.ok{background:#E8F5E9;color:#2E7D32}
+.fb-status.offline{background:#FFF3E0;color:#E65100}
+.empty-state{text-align:center;padding:36px 20px;color:#bbb;font-size:13px}
+
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:11px 22px;border-radius:30px;font-family:'Montserrat',sans-serif;font-weight:600;font-size:13px;z-index:99999;transition:opacity .3s;opacity:0;white-space:nowrap;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+
+/* CALENDAR */
+.cal-day{background:#fff;border-radius:8px;min-height:52px;padding:5px;cursor:pointer;border:1.5px solid #eee;transition:all .15s;position:relative}
+.cal-day:hover{border-color:#1565C0;box-shadow:0 2px 8px rgba(21,101,192,.15)}
+.cal-day.today{border-color:#1565C0;background:#E3F2FD}
+.cal-day.other-month{background:#f8f8f8;opacity:.5;cursor:default}
+.cal-day.has-sched{border-color:#4CAF50}
+.cal-day-num{font-family:Montserrat,sans-serif;font-weight:800;font-size:12px;color:#555}
+.cal-day.today .cal-day-num{color:#1565C0}
+.cal-badge{background:#1565C0;color:#fff;border-radius:10px;font-size:9px;font-weight:700;padding:1px 5px;font-family:Montserrat,sans-serif;margin-top:2px;display:inline-block}
+.cal-badge.pendente{background:#FF9800}
+.cal-badge.confirmado{background:#4CAF50}
+.cal-weekday{font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;color:#aaa;text-align:center;padding:4px 0;text-transform:uppercase;letter-spacing:.5px}
+.sched-item{background:#fff;border-radius:10px;padding:12px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:3px solid #4CAF50;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sched-item.pendente{border-left-color:#FF9800}
+.sched-item.recusado{border-left-color:#f44336}
+.sched-name{font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;color:#222}
+.sched-time{font-family:Montserrat,sans-serif;font-weight:900;font-size:15px;color:#1565C0}
+.sched-actions{display:flex;gap:5px}
+.sched-btn{border:none;border-radius:7px;padding:6px 10px;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.sched-btn.edit{background:#E3F2FD;color:#1565C0}.sched-btn.edit:hover{background:#1565C0;color:#fff}
+.sched-btn.wpp{background:#E8F5E9;color:#2E7D32}.sched-btn.wpp:hover{background:#25D366;color:#fff}
+/* EDIT MODAL */
+#edit-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9998;align-items:center;justify-content:center}
+#edit-modal-overlay.open{display:flex}
+.edit-modal{background:#fff;border-radius:16px;padding:24px 20px;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.edit-modal h3{font-family:Montserrat,sans-serif;font-weight:900;font-size:16px;color:#222;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.edit-modal h3 button{background:none;border:none;font-size:18px;cursor:pointer;color:#aaa}
+.em-label{font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.em-input{width:100%;border:1.5px solid #e8e8e8;border-radius:8px;padding:10px 12px;font-size:14px;color:#333;outline:none;margin-bottom:12px;font-family:'Open Sans',sans-serif;transition:border-color .2s}
+.em-input:focus{border-color:#1565C0}
+.em-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.em-actions{display:flex;gap:8px;margin-top:4px}
+.em-btn{flex:1;padding:12px;border:none;border-radius:10px;font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;cursor:pointer;transition:all .2s}
+.em-btn.save{background:#1565C0;color:#fff}.em-btn.save:hover{background:#0D47A1}
+.em-btn.wpp{background:#25D366;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px}.em-btn.wpp:hover{background:#128C7E}
+.em-btn.cancel{background:#f5f5f5;color:#888}.em-btn.cancel:hover{background:#e0e0e0}
+
+  .hero-title{font-size:42px}
+  .time-display{font-size:28px;width:64px;height:52px}
+  .result-body,.confirm-body{padding:18px 14px 32px}
+  .approved-title{font-size:26px}
+}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- ADMIN LOGIN (overlay discreto) -->
+<div id="admin-login-overlay">
+  <div class="login-box">
+    <div class="login-title">Acesso restrito</div>
+    <div class="login-sub">v1.0 · Facilita Cell</div>
+    <input class="login-input" id="admin-pwd" type="password" placeholder="••••••" maxlength="20"
+      onkeydown="if(event.key==='Enter')adminLogin()">
+    <button class="btn-login" onclick="adminLogin()">ENTRAR</button>
+    <div class="login-err" id="login-err"></div>
+    <button class="login-close" onclick="closeAdminLogin()">cancelar</button>
+  </div>
+</div>
+
+<!-- TELA 1 – HERO -->
+<div class="screen active" id="screen-hero">
+  <div class="logo-box">
+    <div class="logo-wrap">
+      <div class="logo-phone-box">
+        <svg viewBox="0 0 28 28" fill="none" width="28" height="28">
+          <rect x="5" y="2" width="13" height="20" rx="2.5" fill="white"/>
+          <rect x="7" y="4" width="9" height="13" rx="1" fill="#FF8C00"/>
+          <circle cx="11.5" cy="19" r="1.2" fill="#FF8C00"/>
+          <path d="M20 5c1.5.8 2.5 2.4 2.5 4.2S21.5 12.8 20 13.6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M22 3c2.2 1.2 3.7 3.5 3.7 6.2S24.2 14 22 15.2" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="logo-brand"><span class="l1">FACILITA</span><span class="l2">CELL</span></div>
+    </div>
+  </div>
+  <div class="hero-title">CELULAR<br>NO BOLETO</div>
+  <div class="red-banner">MESMO COM NOME SUJO</div>
+  <div class="subtitle">FAÇA UMA PRÉ-ANÁLISE ONLINE AQUI</div>
+  <div style="font-size:22px;margin-top:4px">👇👇</div>
+  <div class="form-card">
+    <div class="field-label">Nome Completo</div>
+    <input class="field-input" id="inp-nome" type="text" placeholder="Seu nome completo" autocomplete="name">
+    <div class="field-label">CPF</div>
+    <input class="field-input" id="inp-cpf" type="text" placeholder="000.000.000-00" maxlength="14" inputmode="numeric">
+    <div class="field-label" style="display:flex;justify-content:space-between;align-items:center">
+      E-mail <span style="font-size:10px;color:rgba(255,255,255,.4);font-weight:400;text-transform:none;letter-spacing:0">opcional</span>
+    </div>
+    <input class="field-input" id="inp-email" type="email" placeholder="seu@email.com">
+    <input type="hidden" id="inp-wpp" value="">
+    <button class="btn-green" onclick="iniciarAnalise()">🔍 FAZER ANÁLISE</button>
+  </div>
+  <p class="footer-text">
+    Simulação de pré-análise. Sujeito à análise presencial.<br>
+    Condições conforme política da empresa.<br>
+    <span class="footer-year" id="footer-year">© 2025</span> Facilita Cell
+    <br><span style="font-size:9px;opacity:.55">🔒 Dados protegidos pela LGPD · Lei nº 13.709/2018</span>
+  </p>
+</div>
+
+<!-- TELA 2 – LOADING -->
+<div class="screen" id="screen-loading">
+  <div class="analyst-svg-wrap"><svg viewBox="0 0 260 280" xmlns="http://www.w3.org/2000/svg" width="260" height="280">
+    <defs>
+      <clipPath id="gc"><circle cx="104" cy="118" r="66"/></clipPath>
+    </defs>
+
+    <!-- floating particles -->
+    <circle cx="22" cy="70"  r="5" fill="#FFA726" style="animation:floatA 2.8s ease-in-out infinite"/>
+    <circle cx="244" cy="55" r="4" fill="#66BB6A" style="animation:floatB 3.2s ease-in-out infinite .4s"/>
+    <circle cx="248" cy="190" r="3" fill="#42A5F5" style="animation:floatC 2.5s ease-in-out infinite .8s"/>
+    <circle cx="14"  cy="195" r="4" fill="#CE93D8" style="animation:floatA 3s ease-in-out infinite 1.2s"/>
+    <circle cx="235" cy="130" r="3" fill="#FFD54F" style="animation:floatB 2.6s ease-in-out infinite .6s"/>
+    <text x="12"  y="130" fill="rgba(255,255,255,.25)" font-family="monospace" font-size="8" style="animation:blinkDot 1.4s infinite">10</text>
+    <text x="240" y="90"  fill="rgba(255,255,255,.25)" font-family="monospace" font-size="8" style="animation:blinkDot 2s infinite .7s">01</text>
+
+    <!-- ── WHOLE FIGURE (float) ── -->
+    <g style="animation:floatFig 3s ease-in-out infinite;transform-origin:130px 140px">
+
+      <!-- ── MAGNIFYING GLASS (swing from handle) ── -->
+      <g style="animation:swingGlass 2.6s ease-in-out infinite;transform-origin:182px 197px">
+        <!-- glass body -->
+        <circle cx="104" cy="118" r="66" fill="rgba(8,22,60,.75)"/>
+        <!-- charts clipped inside -->
+        <g clip-path="url(#gc)">
+          <!-- grid -->
+          <line x1="46" y1="168" x2="162" y2="168" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
+          <line x1="46" y1="148" x2="162" y2="148" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+          <line x1="46" y1="128" x2="162" y2="128" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+          <!-- bars (transform-origin bottom of each bar y=168) -->
+          <rect x="54"  y="148" width="13" height="20" rx="2" fill="#FFA726"
+                style="transform-box:fill-box;transform-origin:50% 100%;animation:barPulse1 2s ease-in-out infinite"/>
+          <rect x="72"  y="136" width="13" height="32" rx="2" fill="#42A5F5"
+                style="transform-box:fill-box;transform-origin:50% 100%;animation:barPulse2 2s ease-in-out infinite .3s"/>
+          <rect x="90"  y="143" width="13" height="25" rx="2" fill="#66BB6A"
+                style="transform-box:fill-box;transform-origin:50% 100%;animation:barPulse3 2s ease-in-out infinite .6s"/>
+          <rect x="108" y="132" width="13" height="36" rx="2" fill="#EF5350"
+                style="transform-box:fill-box;transform-origin:50% 100%;animation:barPulse4 2s ease-in-out infinite .9s"/>
+          <rect x="126" y="140" width="13" height="28" rx="2" fill="#CE93D8"
+                style="transform-box:fill-box;transform-origin:50% 100%;animation:barPulse5 2s ease-in-out infinite 1.2s"/>
+          <rect x="144" y="152" width="13" height="16" rx="2" fill="#FFD54F"
+                style="transform-box:fill-box;transform-origin:50% 100%;animation:barPulse1 2s ease-in-out infinite 1.5s"/>
+          <!-- base -->
+          <line x1="46" y1="169" x2="162" y2="169" stroke="rgba(255,255,255,.35)" stroke-width="1.5"/>
+          <!-- line chart -->
+          <polyline points="56,155 73,141 91,147 109,130 127,136 145,122 160,128"
+            fill="none" stroke="#64FFDA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+            stroke-dasharray="120" style="animation:linePulse 2.5s ease-in-out infinite"/>
+          <circle cx="56"  cy="155" r="3" fill="#64FFDA"/>
+          <circle cx="73"  cy="141" r="3" fill="#64FFDA"/>
+          <circle cx="91"  cy="147" r="3" fill="#64FFDA"/>
+          <circle cx="109" cy="130" r="3" fill="#64FFDA" style="animation:blinkDot .8s infinite"/>
+          <circle cx="127" cy="136" r="3" fill="#64FFDA"/>
+          <circle cx="145" cy="122" r="3" fill="#64FFDA"/>
+          <!-- scan line inside glass -->
+          <rect x="38" y="118" width="132" height="2.5" rx="1" fill="rgba(100,255,218,.6)"
+                style="transform-box:fill-box;transform-origin:50% 50%;animation:scanGlass 1.8s ease-in-out infinite"/>
+          <!-- CPF mask text -->
+          <text x="104" y="100" text-anchor="middle" fill="rgba(255,255,255,.4)"
+                font-family="monospace" font-size="8.5" letter-spacing="1">●●●.●●●.●●●-●●</text>
+          <!-- mini pie chart top-left -->
+          <circle cx="60" cy="90" r="14" fill="none" stroke="#FFA726" stroke-width="14"
+                  stroke-dasharray="22 66" stroke-dashoffset="0" opacity=".8"/>
+          <circle cx="60" cy="90" r="14" fill="none" stroke="#42A5F5" stroke-width="14"
+                  stroke-dasharray="28 60" stroke-dashoffset="-22" opacity=".8"/>
+          <circle cx="60" cy="90" r="14" fill="none" stroke="#66BB6A" stroke-width="14"
+                  stroke-dasharray="16 72" stroke-dashoffset="-50" opacity=".8"/>
+        </g>
+        <!-- glass ring -->
+        <circle cx="104" cy="118" r="66" fill="none" stroke="rgba(255,255,255,.88)" stroke-width="5.5"/>
+        <!-- inner rim -->
+        <circle cx="104" cy="118" r="61" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
+        <!-- glass shine -->
+        <ellipse cx="84" cy="96" rx="16" ry="10" fill="rgba(255,255,255,.06)" transform="rotate(-30,84,96)"/>
+        <!-- handle -->
+        <line x1="158" y1="172" x2="192" y2="206" stroke="#B0BEC5" stroke-width="12" stroke-linecap="round"/>
+        <line x1="158" y1="172" x2="192" y2="206" stroke="#78909C" stroke-width="7"  stroke-linecap="round"/>
+        <line x1="164" y1="166" x2="196" y2="200" stroke="rgba(255,255,255,.2)" stroke-width="3" stroke-linecap="round"/>
+      </g>
+
+      <!-- ── PERSON ── -->
+      <!-- shadow -->
+      <ellipse cx="210" cy="275" rx="26" ry="5" fill="rgba(0,0,0,.22)"/>
+      <!-- legs -->
+      <rect x="196" y="240" width="14" height="36" rx="5" fill="#1a237e"/>
+      <rect x="214" y="240" width="14" height="36" rx="5" fill="#1a237e"/>
+      <!-- shoes -->
+      <ellipse cx="203" cy="275" rx="11" ry="5" fill="#212121"/>
+      <ellipse cx="221" cy="275" rx="11" ry="5" fill="#212121"/>
+      <!-- body/suit -->
+      <rect x="186" y="162" width="50" height="82" rx="8" fill="#283593"/>
+      <!-- shirt -->
+      <rect x="204" y="162" width="16" height="36" rx="3" fill="#FAFAFA"/>
+      <!-- tie -->
+      <polygon points="210,165 214,165 217,196 212,200 207,196" fill="#EF5350"/>
+      <!-- lapels -->
+      <path d="M186,162 L204,182 L204,162Z" fill="#1a237e"/>
+      <path d="M236,162 L218,182 L218,162Z" fill="#1a237e"/>
+      <!-- left arm (holding glass handle) -->
+      <path d="M186,172 Q162,180 182,210" stroke="#283593" stroke-width="16" stroke-linecap="round" fill="none"/>
+      <path d="M186,172 Q162,180 182,210" stroke="#3949AB" stroke-width="10" stroke-linecap="round" fill="none"/>
+      <!-- right arm (relaxed) -->
+      <path d="M236,172 Q252,190 248,215" stroke="#283593" stroke-width="16" stroke-linecap="round" fill="none"/>
+      <path d="M236,172 Q252,190 248,215" stroke="#3949AB" stroke-width="10" stroke-linecap="round" fill="none"/>
+      <!-- hands -->
+      <circle cx="182" cy="212" r="9" fill="#FFCC80"/>
+      <circle cx="248" cy="217" r="9" fill="#FFCC80"/>
+      <!-- neck -->
+      <rect x="206" y="144" width="12" height="20" rx="4" fill="#FFCC80"/>
+      <!-- head -->
+      <circle cx="212" cy="126" r="28" fill="#FFCC80"/>
+      <!-- hair -->
+      <ellipse cx="212" cy="107" rx="28" ry="13" fill="#3E2723"/>
+      <ellipse cx="212" cy="101" rx="24" ry="9"  fill="#4E342E"/>
+      <rect x="184" y="107" width="7"  height="18" rx="3" fill="#3E2723"/>
+      <rect x="209" y="98"  width="7"  height="16" rx="3" fill="#4E342E"/>
+      <!-- ears -->
+      <ellipse cx="184" cy="126" rx="6" ry="8" fill="#FFCC80"/>
+      <ellipse cx="240" cy="126" rx="6" ry="8" fill="#FFCC80"/>
+      <!-- eyes (focused/squinting slightly) -->
+      <ellipse cx="204" cy="126" rx="4" ry="4.5" fill="white"/>
+      <ellipse cx="220" cy="126" rx="4" ry="4.5" fill="white"/>
+      <circle  cx="205" cy="127" r="2.5" fill="#1a237e"/>
+      <circle  cx="221" cy="127" r="2.5" fill="#1a237e"/>
+      <circle  cx="206" cy="126" r="1"   fill="white"/>
+      <circle  cx="222" cy="126" r="1"   fill="white"/>
+      <!-- eyebrows angled (concentrating) -->
+      <path d="M200,120 Q204,117 208,119" fill="none" stroke="#3E2723" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M216,119 Q220,117 224,120" fill="none" stroke="#3E2723" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- mouth (slight smile) -->
+      <path d="M206,136 Q212,141 218,136" fill="none" stroke="#BF360C" stroke-width="2" stroke-linecap="round"/>
+    </g>
+   </svg></div>
+  <div class="loading-title">ANALISANDO SEU PERFIL</div>
+  <div class="loading-sub">Aguarde, processando...</div>
+  <div class="cpf-scan" id="cpf-scan-display"></div>
+  <div class="loading-pill">
+    <div class="spinner"></div>
+    <span id="loading-msg">Buscando mais informações sobre você</span>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill"></div></div>
+</div>
+
+<!-- TELA 3 – RESULTADO -->
+<div class="screen" id="screen-result">
+  <div class="result-header">
+    <div class="logo-wrap">
+      <div class="logo-phone-box">
+        <svg viewBox="0 0 28 28" fill="none" width="28" height="28">
+          <rect x="5" y="2" width="13" height="20" rx="2.5" fill="white"/>
+          <rect x="7" y="4" width="9" height="13" rx="1" fill="#FF8C00"/>
+          <circle cx="11.5" cy="19" r="1.2" fill="#FF8C00"/>
+          <path d="M20 5c1.5.8 2.5 2.4 2.5 4.2S21.5 12.8 20 13.6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M22 3c2.2 1.2 3.7 3.5 3.7 6.2S24.2 14 22 15.2" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="logo-brand"><span class="l1">FACILITA</span><span class="l2">CELL</span></div>
+    </div>
+  </div>
+  <div class="result-body">
+    <div class="mascot-wrap"><img src="data:image/png;base64,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" alt="" style="width:210px;height:auto;display:block;margin:0 auto"></div>
+    <div class="approved-title">PARABÉNS,<br><span id="nome-result">VOCÊ</span> FOI<br>APROVADO!</div>
+    <div class="party-emoji">🎉</div>
+    <div class="limit-badge">
+      <div class="dot"></div>
+      <div class="limit-badge-text">Limite aprovado: <strong id="limite-display">R$ 2.500,00</strong></div>
+    </div>
+    <div class="validity-pill">✅ Aprovação válida por 48 horas</div>
+    <div class="countdown-wrap">Expira em: <span class="countdown-timer" id="countdown">47:59:59</span></div>
+    <p class="result-desc">Agende sua visita e saia com celular novo <strong>parcelado no boleto!</strong></p>
+    <div class="schedule-box">
+      <div class="schedule-title">📅 Escolha o dia</div>
+      <div class="days-grid" id="days-grid"></div>
+      <div class="schedule-title">🕐 Escolha o horário</div>
+      <div class="time-picker">
+        <div class="time-col">
+          <button class="time-arrow" onclick="changeHour(1)">▲</button>
+          <div class="time-display" id="hour-display">08</div>
+          <button class="time-arrow" onclick="changeHour(-1)">▼</button>
+          <div class="time-label">hora</div>
+        </div>
+        <div class="time-sep">:</div>
+        <div class="time-col">
+          <button class="time-arrow" onclick="changeMin(1)">▲</button>
+          <div class="time-display" id="min-display">00</div>
+          <button class="time-arrow" onclick="changeMin(-1)">▼</button>
+          <div class="time-label">min</div>
+        </div>
+      </div>
+      <div class="schedule-hint" id="sched-hint">Selecione o dia para agendar</div>
+      <div class="atendimento-note">🕘 Seg a Sáb · 09h às 17h50min · Não fechamos para almoço · Domingos fechado</div>
+    </div>
+    <a class="btn-whatsapp disabled" id="btn-wpp" href="#" onclick="enviarWhatsApp(event)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.558 4.116 1.535 5.845L.057 23.882a.5.5 0 0 0 .61.61l6.037-1.478A11.953 11.953 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.812 9.812 0 0 1-4.996-1.368l-.358-.213-3.713.91.927-3.622-.234-.373A9.818 9.818 0 0 1 2.182 12C2.182 6.57 6.57 2.182 12 2.182c5.43 0 9.818 4.388 9.818 9.818 0 5.43-4.388 9.818-9.818 9.818z"/></svg>
+      AGENDAR PELO WHATSAPP
+    </a>
+  </div>
+</div>
+
+<!-- TELA 4 – CONFIRMAÇÃO -->
+<div class="screen" id="screen-confirm">
+  <div class="result-header">
+    <div class="logo-wrap">
+      <div class="logo-phone-box"><svg viewBox="0 0 28 28" fill="none" width="28" height="28"><rect x="5" y="2" width="13" height="20" rx="2.5" fill="white"/><rect x="7" y="4" width="9" height="13" rx="1" fill="#FF8C00"/><circle cx="11.5" cy="19" r="1.2" fill="#FF8C00"/></svg></div>
+      <div class="logo-brand"><span class="l1">FACILITA</span><span class="l2">CELL</span></div>
+    </div>
+  </div>
+  <div class="confirm-body">
+    <div class="confirm-icon">✅</div>
+    <div class="confirm-title">Agendamento Enviado!</div>
+    <p style="font-size:13px;color:#666;text-align:center;margin-bottom:18px;line-height:1.6">Análise enviada para nossa equipe.<br>Em breve entraremos em contato!</p>
+    <div class="confirm-card">
+      <div class="confirm-row"><span class="lbl">Cliente</span><span class="val" id="c-nome">—</span></div>
+      <div class="confirm-row"><span class="lbl">Limite</span><span class="val green" id="c-limite">—</span></div>
+      <div class="confirm-row"><span class="lbl">Data</span><span class="val" id="c-dia">—</span></div>
+      <div class="confirm-row"><span class="lbl">Horário</span><span class="val" id="c-hora">—</span></div>
+      <div class="confirm-row"><span class="lbl">Validade</span><span class="val" id="c-validade">—</span></div>
+    </div>
+    <p style="font-size:12px;color:#bbb;text-align:center;margin-bottom:16px">Aguarde confirmação pelo WhatsApp 📲</p>
+    <button class="btn-outline" onclick="novaConsulta()">Fazer nova consulta</button>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="screen-admin">
+  <div class="admin-header">
+    <div class="admin-header-left">
+      <div class="admin-logo-dot"></div>
+      <div class="admin-title">painel <span>· facilita cell</span></div>
+    </div>
+    <button class="section-out" onclick="adminLogout()">sair ×</button>
+  </div>
+  <div class="admin-tabs">
+    <div class="admin-tab active" id="tab-btn-dashboard" onclick="switchTab('dashboard',this)">Dashboard</div>
+    <div class="admin-tab" id="tab-btn-analises" onclick="switchTab('analises',this)">Análises</div>
+    <div class="admin-tab" id="tab-btn-calendario" onclick="switchTab('calendario',this)">Calendário</div>
+    <div class="admin-tab" id="tab-btn-config" onclick="switchTab('config',this)">Config</div>
+  </div>
+  <div class="admin-content active" id="tab-dashboard">
+    <div id="fb-indicator" class="fb-status offline">⚪ Salvando localmente</div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="sc-num sc-blue" id="stat-hoje">0</div><div class="sc-lbl">Hoje</div></div>
+      <div class="stat-card"><div class="sc-num sc-green" id="stat-semana">0</div><div class="sc-lbl">Esta semana</div></div>
+      <div class="stat-card"><div class="sc-num sc-orange" id="stat-pendente">0</div><div class="sc-lbl">Pendentes</div></div>
+      <div class="stat-card"><div class="sc-num sc-blue" id="stat-total">0</div><div class="sc-lbl">Total</div></div>
+    </div>
+    <div style="font-family:Montserrat,sans-serif;font-size:12px;font-weight:800;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Recentes</div>
+    <div id="recent-list"></div>
+  </div>
+  <div class="admin-content" id="tab-analises">
+    <div class="filter-row">
+      <div class="filter-btn active" onclick="filterAnalises('todas',this)">Todas</div>
+      <div class="filter-btn" onclick="filterAnalises('pendente',this)">Pendentes</div>
+      <div class="filter-btn" onclick="filterAnalises('confirmado',this)">Confirmadas</div>
+      <div class="filter-btn" onclick="filterAnalises('recusado',this)">Recusadas</div>
+    </div>
+    <div id="analises-list"></div>
+  </div>
+  <div class="admin-content" id="tab-calendario">
+    <div id="cal-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <button onclick="calNav(-1)" style="background:#fff;border:1.5px solid #ddd;border-radius:8px;padding:7px 14px;font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;cursor:pointer;color:#555">‹ Anterior</button>
+      <div id="cal-month-label" style="font-family:Montserrat,sans-serif;font-weight:800;font-size:15px;color:#333"></div>
+      <button onclick="calNav(1)" style="background:#fff;border:1.5px solid #ddd;border-radius:8px;padding:7px 14px;font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;cursor:pointer;color:#555">Próximo ›</button>
+    </div>
+    <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:16px"></div>
+    <div id="cal-day-detail" style="display:none">
+      <div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px" id="cal-detail-title"></div>
+      <div id="cal-detail-list"></div>
+    </div>
+  </div>
+  <div class="admin-content" id="tab-config">
+    <div class="settings-section">
+      <h3>Dados da loja</h3>
+      <div class="s-label">Nome da loja</div><input class="s-input" id="cfg-nome" placeholder="Facilita Cell">
+    </div>
+    <div class="settings-section">
+      <h3>Firebase (nuvem)</h3>
+      <div class="s-label">API Key</div><input class="s-input" id="cfg-fb-apikey" placeholder="AIzaSy...">
+      <div class="s-label">Project ID</div><input class="s-input" id="cfg-fb-projectid" placeholder="meu-projeto-12345">
+      <div class="s-label">App ID</div><input class="s-input" id="cfg-fb-appid" placeholder="1:123456:web:abc...">
+      <div class="s-label">Sender ID</div><input class="s-input" id="cfg-fb-senderid" placeholder="486920075616" inputmode="numeric">
+    </div>
+    <div class="settings-section">
+      <h3>Segurança</h3>
+      <div class="s-label">Nova senha do admin</div><input class="s-input" id="cfg-pwd" type="password" placeholder="deixe em branco para manter">
+      <div class="s-label">Máx. tentativas por CPF/dia</div><input class="s-input" id="cfg-maxattempts" type="number" min="1" max="10" placeholder="3">
+    </div>
+    <div class="settings-section">
+      <h3>Horários</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><div class="s-label">Abertura</div><input class="s-input" id="cfg-hstart" type="time" value="09:00"></div>
+        <div><div class="s-label">Fechamento</div><input class="s-input" id="cfg-hend" type="time" value="17:50"></div>
+      </div>
+    </div>
+    <button class="btn-save" onclick="saveConfig()">Salvar configurações</button>
+    <button class="btn-danger" onclick="clearData()">Limpar todos os dados</button>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div id="edit-modal-overlay">
+  <div class="edit-modal">
+    <h3>✏️ Editar dados do cliente <button onclick="closeEditModal()">×</button></h3>
+    <input type="hidden" id="em-id">
+    <div class="em-label">Nome</div>
+    <input class="em-input" id="em-nome" placeholder="Nome completo">
+    <div class="em-label">WhatsApp</div>
+    <input class="em-input" id="em-wpp" placeholder="(45) 99999-9999" inputmode="numeric">
+    <div class="em-label">Dia do agendamento</div>
+    <input class="em-input" id="em-dia" type="date">
+    <div class="em-label">Horário</div>
+    <input class="em-input" id="em-hora" type="time">
+    <div class="em-label">Status</div>
+    <select class="em-input" id="em-status">
+      <option value="pendente">Pendente</option>
+      <option value="confirmado">Confirmado</option>
+      <option value="recusado">Recusado</option>
+    </select>
+    <div class="em-actions">
+      <button class="em-btn cancel" onclick="closeEditModal()">Cancelar</button>
+      <button class="em-btn save" onclick="saveEdit()">💾 Salvar</button>
+    </div>
+    <div style="margin-top:8px">
+      <button class="em-btn wpp" style="width:100%" onclick="reenviarWpp()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.558 4.116 1.535 5.845L.057 23.882a.5.5 0 0 0 .61.61l6.037-1.478A11.953 11.953 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.812 9.812 0 0 1-4.996-1.368l-.358-.213-3.713.91.927-3.622-.234-.373A9.818 9.818 0 0 1 2.182 12C2.182 6.57 6.57 2.182 12 2.182c5.43 0 9.818 4.388 9.818 9.818 0 5.43-4.388 9.818-9.818 9.818z"/></svg>
+        Reenviar via WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+let db = null;
+let fbReady = false;
+
+function initFirebase() {
+  const s = getSettings();
+  if (!s.fbApiKey || !s.fbProjectId || !s.fbAppId) return;
+  try {
+    if (firebase.apps.length) firebase.app().delete().catch(()=>{});
+    firebase.initializeApp({
+      apiKey: s.fbApiKey,
+      authDomain: s.fbProjectId + '.firebaseapp.com',
+      projectId: s.fbProjectId,
+      storageBucket: s.fbProjectId + '.firebasestorage.app',
+      messagingSenderId: s.fbSenderId || '',
+      appId: s.fbAppId
+    });
+    db = firebase.firestore();
+    fbReady = true;
+    const ind = document.getElementById('fb-indicator');
+    if (ind) { ind.className = 'fb-status ok'; ind.textContent = '🟢 Conectado ao Firebase'; }
+  } catch(e) {
+    fbReady = false;
+    console.warn('Firebase init error:', e);
+  }
+}
+
+// ══════════════════════════════════════════════════
+// STORAGE (Firebase com fallback localStorage)
+// ══════════════════════════════════════════════════
+async function saveAnalise(analise) {
+  if (fbReady && db) {
+    try {
+      await db.collection('analises').doc(String(analise.id)).set(analise);
+      return;
+    } catch(e) { console.warn('Firebase save error, using localStorage'); }
+  }
+  const list = getLocalAnalises();
+  list.unshift(analise);
+  localStorage.setItem('fc_analises', JSON.stringify(list));
+}
+
+async function loadAnalises() {
+  if (fbReady && db) {
+    try {
+      const snap = await db.collection('analises').orderBy('timestamp','desc').limit(200).get();
+      return snap.docs.map(d => d.data());
+    } catch(e) { console.warn('Firebase load error, using localStorage'); }
+  }
+  return getLocalAnalises();
+}
+
+async function updateAnaliseStatus(id, status) {
+  if (fbReady && db) {
+    try {
+      await db.collection('analises').doc(String(id)).update({ status });
+      return;
+    } catch(e) {}
+  }
+  const list = getLocalAnalises();
+  const idx = list.findIndex(a => a.id === id);
+  if (idx > -1) { list[idx].status = status; localStorage.setItem('fc_analises', JSON.stringify(list)); }
+}
+
+function getLocalAnalises() {
+  try { return JSON.parse(localStorage.getItem('fc_analises') || '[]'); } catch(e) { return []; }
+}
+
+function getSettings() {
+  // Configurações padrão — horário 09:00–17:50, Dom fechado
+  const def = { storeName:'Facilita Cell', adminPwd:'facilita2025',
+    maxAttempts:3, hStart:'09:00', hEnd:'17:50',
+    closedDays:[0], // 0=Dom, 6=Sáb. Domingos fechados por padrão
+    fbApiKey:'AIzaSyD9LA2ey3b6Im23_7YCxslgRT27aDB8okY', fbProjectId:'consultacpf-5809c', fbAppId:'1:486920075616:web:0ae3dfc6af9fb1b76a8605', fbSenderId:'486920075616' };
+  try { return Object.assign(def, JSON.parse(localStorage.getItem('fc_settings') || '{}')); } catch(e) { return def; }
+}
+function saveSettings(s) { localStorage.setItem('fc_settings', JSON.stringify(s)); }
+function getAttempts() { try { return JSON.parse(localStorage.getItem('fc_attempts')||'{}'); } catch(e) { return {}; } }
+function saveAttempts(a) { localStorage.setItem('fc_attempts', JSON.stringify(a)); }
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  initFirebase();
+  // Acesso admin por URL hash
+  if (window.location.hash === '#fc-admin') openAdminLogin();
+  window.addEventListener('hashchange', () => {
+    if (window.location.hash === '#fc-admin') openAdminLogin();
+  });
+});
+
+// ══════════════════════════════════════════════════
+// SCREENS
+// ══════════════════════════════════════════════════
+function showScreen(id) {
+  ['screen-hero','screen-loading','screen-result','screen-confirm','screen-admin'].forEach(s => {
+    const el = document.getElementById(s);
+    if (!el) return;
+    el.style.display = 'none';
+    el.classList.remove('active');
+  });
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (id === 'screen-admin') { el.style.display = 'block'; }
+  else { el.style.display = 'flex'; el.classList.add('active'); }
+  window.scrollTo(0,0);
+}
+
+// ══════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════
+function toast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.background = color || '#323232'; t.style.opacity = '1';
+  clearTimeout(t._t); t._t = setTimeout(() => { t.style.opacity = '0'; }, 2800);
+}
+
+// ══════════════════════════════════════════════════
+// MASKS
+// ══════════════════════════════════════════════════
+document.getElementById('inp-cpf').addEventListener('input', function(e) {
+  let v = e.target.value.replace(/\D/g,'');
+  if (v.length > 11) v = v.slice(0,11);
+  v = v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+  e.target.value = v;
+});
+// ══════════════════════════════════════════════════
+// VALIDATION
+// ══════════════════════════════════════════════════
+function validarCPF(cpf) {
+  const d = cpf.replace(/\D/g,'');
+  if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+  let s = 0; for (let i=0;i<9;i++) s += parseInt(d[i])*(10-i);
+  let r = s%11; if (parseInt(d[9]) !== (r<2?0:11-r)) return false;
+  s = 0; for (let i=0;i<10;i++) s += parseInt(d[i])*(11-i);
+  r = s%11; return parseInt(d[10]) === (r<2?0:11-r);
+}
+function checkAttempts(cpfD) {
+  const a = getAttempts(); const today = new Date().toDateString();
+  return (a[cpfD+'_'+today]||0) < getSettings().maxAttempts;
+}
+function registerAttempt(cpfD) {
+  const a = getAttempts(); const today = new Date().toDateString();
+  const k = cpfD+'_'+today; a[k] = (a[k]||0)+1; saveAttempts(a);
+}
+function markError(id, msg) {
+  const el = document.getElementById(id);
+  el.classList.add('error'); el.style.animation = 'shake .4s ease';
+  setTimeout(()=>{ el.style.animation=''; }, 400);
+  el.addEventListener('input', function f(){ el.classList.remove('error'); el.removeEventListener('input',f); });
+  toast(msg, '#C62828');
+}
+
+// ══════════════════════════════════════════════════
+// LIMIT
+// ══════════════════════════════════════════════════
+function gerarLimite(cpfRaw) {
+  const d = cpfRaw.replace(/\D/g,''); let h=0;
+  for (let i=0;i<d.length;i++) { h+=parseInt(d[i])*(i+7); h=(h*31+17)%9973; }
+  const opts=[]; for (let v=2000;v<=2800;v+=50) opts.push(v);
+  return opts[h%opts.length];
+}
+function fmtBRL(v) { return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+// ══════════════════════════════════════════════════
+// MAIN FLOW
+// ══════════════════════════════════════════════════
+const loadingMsgs = ['Buscando mais informações sobre você','Verificando seus dados...','Consultando políticas da loja...','Calculando seu limite aprovado...','Finalizando sua pré-análise...'];
+
+function iniciarAnalise() {
+  const nome = document.getElementById('inp-nome').value.trim();
+  const cpf  = document.getElementById('inp-cpf').value.trim();
+  const wpp  = document.getElementById('inp-wpp').value.trim();
+  const email= document.getElementById('inp-email').value.trim();
+  const partes = nome.split(/\s+/).filter(p=>p.length>=2);
+  if (!nome) { markError('inp-nome','⚠️ Informe seu nome completo'); return; }
+  if (partes.length < 2) { markError('inp-nome','⚠️ Digite nome e sobrenome'); return; }
+  if (cpf.length < 14) { markError('inp-cpf','⚠️ CPF incompleto'); return; }
+  if (!validarCPF(cpf)) { markError('inp-cpf','⚠️ CPF inválido'); return; }
+  const cpfD = cpf.replace(/\D/g,'');
+  if (!checkAttempts(cpfD)) { toast('⚠️ Limite de consultas atingido para este CPF hoje','#E65100'); return; }
+  registerAttempt(cpfD);
+  showScreen('screen-loading');
+  const cpfEl = document.getElementById('cpf-scan-display');
+  cpfEl.innerHTML = ''; let delay = 0;
+  for (let i=0;i<cpf.length;i++) {
+    const sp = document.createElement('span'); sp.textContent = cpf[i]; sp.style.animationDelay = delay+'s';
+    cpfEl.appendChild(sp); delay += cpf[i].match(/\d/) ? 0.12 : 0.05;
+  }
+  const prog = document.getElementById('progress-fill');
+  let p = 0; const pi = setInterval(()=>{ p+=Math.random()*7+3; if(p>90)p=90; prog.style.width=p+'%'; },220);
+  let mi = 0; const msgEl = document.getElementById('loading-msg');
+  const ii = setInterval(()=>{ mi=(mi+1)%loadingMsgs.length; msgEl.textContent=loadingMsgs[mi]; },700);
+  setTimeout(()=>{
+    clearInterval(pi); clearInterval(ii); prog.style.width='100%';
+    const limite = gerarLimite(cpf);
+    window._analise = { nome, cpf, cpfD, wpp, email, limite,
+      dataHora: new Date().toLocaleDateString('pt-BR')+' às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) };
+    mostrarResultado();
+  }, 4000);
+}
+
+function mostrarResultado() {
+  const a = window._analise;
+  document.getElementById('nome-result').textContent = a.nome.split(' ')[0].toUpperCase()+',';
+  document.getElementById('limite-display').textContent = fmtBRL(a.limite);
+  selectedDay=null; selectedDayISO=null; selectedTime='09:00'; currentHour=9; currentMin=0;
+  const hd=document.getElementById('hour-display'); const md=document.getElementById('min-display');
+  if(hd)hd.textContent='09'; if(md)md.textContent='00';
+  document.getElementById('btn-wpp').classList.add('disabled');
+  document.getElementById('sched-hint').textContent='Selecione o dia para agendar';
+  document.getElementById('sched-hint').style.color='';
+  buildDaysGrid(); startCountdown(); showScreen('screen-result');
+}
+
+// ══════════════════════════════════════════════════
+// COUNTDOWN
+// ══════════════════════════════════════════════════
+let countdownInterval = null;
+function startCountdown() {
+  clearInterval(countdownInterval); let secs = 48*3600;
+  function upd() {
+    const h=Math.floor(secs/3600),m=Math.floor((secs%3600)/60),s=secs%60;
+    const el=document.getElementById('countdown');
+    if(el) el.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    if(secs>0) secs--; else clearInterval(countdownInterval);
+  }
+  upd(); countdownInterval=setInterval(upd,1000);
+}
+
+// ══════════════════════════════════════════════════
+// SCHEDULING
+// ══════════════════════════════════════════════════
+// selectedDayISO armazena a data real escolhida pelo cliente (YYYY-MM-DD)
+let selectedDay=null, selectedDayISO=null, selectedTime='09:00', currentHour=9, currentMin=0;
+const diasSemana=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const meses=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+function buildDaysGrid() {
+  const grid=document.getElementById('days-grid'); if(!grid) return; grid.innerHTML='';
+  const settings=getSettings();
+  // Dias fechados: 0=Dom por padrão; adicione 6=Sáb se necessário
+  const closed=settings.closedDays||[0];
+  const today=new Date();
+  for(let i=1;i<=14&&grid.children.length<6;i++) {
+    const d=new Date(today); d.setDate(today.getDate()+i);
+    if(closed.includes(d.getDay())) continue; // pula dias fechados (Dom, feriados)
+    const btn=document.createElement('div'); btn.className='day-btn';
+    btn.innerHTML='<span class="day-name">'+diasSemana[d.getDay()]+'</span><span class="day-num">'+d.getDate()+'</span><span class="day-month">'+meses[d.getMonth()]+'</span>';
+    // Chave ISO para referenciar no calendário admin: YYYY-MM-DD
+    const isoKey=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const label=diasSemana[d.getDay()]+', '+d.getDate()+' de '+meses[d.getMonth()];
+    btn.onclick=(function(b,l,k){return function(){selectDay(b,l,k);};})(btn,label,isoKey);
+    grid.appendChild(btn);
+  }
+}
+function selectDay(el,label,isoKey) {
+  document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedDay=label;
+  // Armazena a data ISO real para o calendário admin (não a data de cadastro)
+  selectedDayISO=isoKey||null;
+  checkSchedule();
+}
+function pad(n){return n<10?'0'+n:''+n;}
+function changeHour(dir) {
+  const s=getSettings();
+  const hMin=parseInt((s.hStart||'09:00').split(':')[0]);
+  const hMax=parseInt((s.hEnd||'17:50').split(':')[0]);
+  currentHour+=dir;
+  if(currentHour<hMin) currentHour=hMax;
+  if(currentHour>hMax) currentHour=hMin;
+  document.getElementById('hour-display').textContent=pad(currentHour);
+  selectedTime=pad(currentHour)+':'+pad(currentMin); checkSchedule();
+}
+function changeMin(dir) {
+  const s=getSettings();
+  const hMax=parseInt((s.hEnd||'17:50').split(':')[0]);
+  const mMax=parseInt((s.hEnd||'17:50').split(':')[1]||'50');
+  currentMin+=dir*5;
+  if(currentMin<0) currentMin=55;
+  if(currentMin>55) currentMin=0;
+  // Impede ultrapassar horário de fechamento
+  if(currentHour>=hMax && currentMin>mMax) currentMin=0;
+  document.getElementById('min-display').textContent=pad(currentMin);
+  selectedTime=pad(currentHour)+':'+pad(currentMin); checkSchedule();
+}
+function checkSchedule() {
+  const btn=document.getElementById('btn-wpp'); const hint=document.getElementById('sched-hint');
+  if(!selectedTime) selectedTime=pad(currentHour)+':'+pad(currentMin);
+  if(selectedDay) {
+    btn.classList.remove('disabled');
+    hint.textContent='✅ '+selectedDay+' às '+selectedTime; hint.style.color='#A5D6A7';
+  } else { btn.classList.add('disabled'); hint.textContent='Selecione o dia para agendar'; hint.style.color=''; }
+}
+
+// ══════════════════════════════════════════════════
+// WHATSAPP + SAVE
+// ══════════════════════════════════════════════════
+async function enviarWhatsApp(e) {
+  e.preventDefault();
+  const a = window._analise; if(!a) return;
+  const settings = getSettings();
+  // Usa o label legível no WhatsApp e a chave ISO para o calendário admin
+  const ag = (selectedDay&&selectedTime) ? selectedDay+' as '+selectedTime : 'Nao informado';
+  // scheduleISO é a data real de comparecimento — base para o calendário
+  const scheduleISO = selectedDayISO || null;
+  const msg = encodeURIComponent(
+    '*FACILITA CELL*\n*Nova Pre-Analise Recebida*\n\n'+
+    '*Nome:* '+a.nome+'\n*CPF:* '+a.cpfD+'\n*WhatsApp:* '+a.wpp+
+    (a.email?'\n*Email:* '+a.email:'')+'\n\n*RESULTADO*\n\n'+
+    '*Status:* APROVADO\n*Limite:* '+fmtBRL(a.limite)+'\n*Validade:* 48 horas\n*Data:* '+a.dataHora+
+    '\n\n*Agendamento:* '+ag
+  );
+  const url = 'https://wa.me/?text='+msg;
+  const id = Date.now();
+  const analise = {id,nome:a.nome,cpf:a.cpfD,wpp:a.wpp,email:a.email||'',limite:a.limite,
+    // dataHora = data/hora do CADASTRO (análise online)
+    dataHora:a.dataHora,
+    // agendamento = data/hora escolhida pelo CLIENTE para comparecer
+    agendamento:ag,
+    // scheduleDate = chave ISO (YYYY-MM-DD) da data de comparecimento — usada no calendário
+    scheduleDate: scheduleISO,
+    status:'pendente',timestamp:id};
+  await saveAnalise(analise);
+  document.getElementById('c-nome').textContent=a.nome;
+  document.getElementById('c-limite').textContent=fmtBRL(a.limite);
+  document.getElementById('c-dia').textContent=selectedDay||'—';
+  document.getElementById('c-hora').textContent=selectedTime||'—';
+  const exp=new Date(Date.now()+48*3600*1000);
+  document.getElementById('c-validade').textContent=exp.toLocaleDateString('pt-BR')+' às '+exp.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  clearInterval(countdownInterval); showScreen('screen-confirm');
+  // Confirmação visual de sucesso
+  toast('✅ Agendamento realizado com sucesso!', '#2E7D32');
+  setTimeout(()=>{ try{window.open(url,'_blank');}catch(ex){window.location.href=url;} },600);
+}
+function novaConsulta() {
+  ['inp-nome','inp-cpf','inp-wpp','inp-email'].forEach(id=>{ document.getElementById(id).value=''; });
+  showScreen('screen-hero');
+}
+
+// ══════════════════════════════════════════════════
+// ADMIN ACCESS — discreto
+// Triple-click no "© 2025" do rodapé OU URL hash #fc-admin
+// ══════════════════════════════════════════════════
+let yearClicks=0, yearTimer=null;
+document.getElementById('footer-year').addEventListener('click', function() {
+  yearClicks++;
+  clearTimeout(yearTimer);
+  yearTimer = setTimeout(()=>{ yearClicks=0; }, 1500);
+  if (yearClicks >= 3) { yearClicks=0; openAdminLogin(); }
+});
+
+function openAdminLogin() {
+  document.getElementById('admin-pwd').value='';
+  document.getElementById('login-err').textContent='';
+  document.getElementById('admin-login-overlay').classList.add('open');
+}
+function closeAdminLogin() {
+  document.getElementById('admin-login-overlay').classList.remove('open');
+  history.pushState('',document.title,window.location.pathname);
+}
+function adminLogin() {
+  const pwd = document.getElementById('admin-pwd').value;
+  const settings = getSettings();
+  if (pwd === settings.adminPwd) {
+    closeAdminLogin();
+    document.getElementById('screen-admin').style.display='block';
+    ['screen-hero','screen-loading','screen-result','screen-confirm'].forEach(s=>{
+      const el=document.getElementById(s); if(el){el.style.display='none';el.classList.remove('active');}
+    });
+    window.scrollTo(0,0);
+    renderAdmin();
+  } else {
+    document.getElementById('login-err').textContent='Senha incorreta';
+    document.getElementById('admin-pwd').value='';
+  }
+}
+function adminLogout() { closeAdminLogin(); showScreen('screen-hero'); }
+
+// ══════════════════════════════════════════════════
+// ADMIN RENDER
+// ══════════════════════════════════════════════════
+let currentFilter='todas';
+async function renderAdmin() {
+  const analises = await loadAnalises();
+  const today = new Date().toDateString();
+  const week = new Date(); week.setDate(week.getDate()-7);
+  document.getElementById('stat-hoje').textContent=analises.filter(a=>new Date(a.timestamp).toDateString()===today).length;
+  document.getElementById('stat-semana').textContent=analises.filter(a=>a.timestamp>week.getTime()).length;
+  document.getElementById('stat-pendente').textContent=analises.filter(a=>a.status==='pendente').length;
+  document.getElementById('stat-total').textContent=analises.length;
+  const ind=document.getElementById('fb-indicator');
+  if(ind){ ind.className='fb-status '+(fbReady?'ok':'offline'); ind.textContent=fbReady?'🟢 Firebase conectado':'⚪ Salvando localmente'; }
+  renderRecentList(analises.slice(0,5));
+  renderAnalisesList(analises);
+  const s=getSettings();
+  document.getElementById('cfg-nome').value=s.storeName;
+  document.getElementById('cfg-wpp').value=s.storeWpp;
+  document.getElementById('cfg-maxattempts').value=s.maxAttempts;
+  document.getElementById('cfg-hstart').value=s.hStart;
+  document.getElementById('cfg-hend').value=s.hEnd;
+  document.getElementById('cfg-fb-apikey').value=s.fbApiKey||'';
+  document.getElementById('cfg-fb-projectid').value=s.fbProjectId||'';
+  document.getElementById('cfg-fb-appid').value=s.fbAppId||'';
+  document.getElementById('cfg-fb-senderid').value=s.fbSenderId||'';
+}
+function renderRecentList(list) {
+  const el=document.getElementById('recent-list');
+  if(!list.length){el.innerHTML='<div class="empty-state">Nenhuma análise ainda</div>';return;}
+  el.innerHTML=list.map(a=>analysisCard(a,true)).join('');
+}
+function renderAnalisesList(list) {
+  const filtered=currentFilter==='todas'?list:list.filter(a=>a.status===currentFilter);
+  const el=document.getElementById('analises-list');
+  if(!filtered.length){el.innerHTML='<div class="empty-state">Nenhuma análise encontrada</div>';return;}
+  el.innerHTML=filtered.map(a=>analysisCard(a,false)).join('');
+}
+function analysisCard(a,mini) {
+  const bCls=a.status==='pendente'?'pendente':a.status==='confirmado'?'confirmado':'recusado';
+  const bTxt=a.status==='pendente'?'Pendente':a.status==='confirmado'?'Confirmado':'Recusado';
+  const cpfFmt=a.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');
+  return `<div class="analysis-card ${bCls}">
+    <div class="ac-header">
+      <div class="ac-name">${a.nome}</div>
+      <div class="ac-badge ${bCls}">${bTxt}</div>
+    </div>
+    <div class="ac-info">
+      <strong>CPF:</strong> ${cpfFmt} · <strong>Tel:</strong> ${a.wpp}<br>
+      <strong>Limite:</strong> ${fmtBRL(a.limite)} · <strong>Data:</strong> ${a.dataHora}<br>
+      <strong>Agendamento:</strong> ${a.agendamento}${a.email?'<br><strong>Email:</strong> '+a.email:''}
+    </div>
+    ${!mini?`<div class="ac-actions">
+      <button class="ac-btn confirm" onclick="doUpdateStatus(${a.id},'confirmado')">✅ Confirmar</button>
+      <button class="ac-btn refuse" onclick="doUpdateStatus(${a.id},'recusado')">❌ Recusar</button>
+      <button class="ac-btn contact" onclick="contactClient('${a.wpp}','${a.nome}','${a.agendamento}','${fmtBRL(a.limite)}')">📲 Contatar</button>
+      <button class="ac-btn" style="background:#FFF8E1;color:#E65100;flex:none;padding:8px 10px" onclick="openEditModal(${a.id})">✏️ Editar dados</button>
+    </div>`:''}
+  </div>`;
+}
+async function doUpdateStatus(id,status) {
+  await updateAnaliseStatus(id,status); renderAdmin();
+  toast(status==='confirmado'?'✅ Confirmado!':'❌ Recusado','#1565C0');
+}
+function contactClient(wpp,nome,ag,limite) {
+  const msg=encodeURIComponent('Olá '+nome.split(' ')[0]+'! Seu agendamento na Facilita Cell foi confirmado.\n\nData: '+ag+'\nLimite: '+limite+'\n\nTe esperamos! 😊');
+  const url='https://wa.me/55'+wpp.replace(/\D/g,'')+'?text='+msg;
+  try{window.open(url,'_blank');}catch(e){window.location.href=url;}
+}
+function filterAnalises(f,el) {
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  loadAnalises().then(list=>renderAnalisesList(list));
+}
+function switchTab(tab,el) {
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.admin-content').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='dashboard'||tab==='analises') renderAdmin();
+  if(tab==='calendario') renderCalendario();
+}
+
+// ══════════════════════════════════════════════════
+// CALENDAR
+// ══════════════════════════════════════════════════
+const mesesPT=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const diasSemanaShort=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
+
+function calNav(dir) { calMonth+=dir; if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;} renderCalendario(); }
+
+async function renderCalendario() {
+  document.getElementById('cal-month-label').textContent=mesesPT[calMonth]+' '+calYear;
+  const analises=await loadAnalises();
+  // Build map: "YYYY-MM-DD" -> list of analises
+  const map={};
+  analises.forEach(a=>{
+    const ag=a.agendamento||'';
+    // Try to extract date from agendamento string or from editedDate
+    const dateKey=extractDateKey(a);
+    if(!dateKey) return;
+    if(!map[dateKey]) map[dateKey]=[];
+    map[dateKey].push(a);
+  });
+  const grid=document.getElementById('cal-grid');
+  grid.innerHTML='';
+  // Weekday headers
+  diasSemanaShort.forEach(d=>{
+    const h=document.createElement('div');
+    h.className='cal-weekday'; h.textContent=d; grid.appendChild(h);
+  });
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const daysInPrev=new Date(calYear,calMonth,0).getDate();
+  const today=new Date();
+  // Prev month padding
+  for(let i=firstDay-1;i>=0;i--) {
+    const d=document.createElement('div'); d.className='cal-day other-month';
+    d.innerHTML='<div class="cal-day-num">'+(daysInPrev-i)+'</div>'; grid.appendChild(d);
+  }
+  // Current month days
+  for(let day=1;day<=daysInMonth;day++) {
+    const d=document.createElement('div'); d.className='cal-day';
+    const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===day;
+    if(isToday) d.classList.add('today');
+    // Marca domingos como fechados no calendário
+    const settings2=getSettings();
+    const closedDays2=settings2.closedDays||[0];
+    const dowCheck=new Date(calYear,calMonth,day).getDay();
+    if(closedDays2.includes(dowCheck)) { d.classList.add('other-month'); d.style.background='#fff0f0'; d.style.opacity='0.6'; d.onclick=null; d.title='Fechado'; }
+    const key=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+    const dayAnalises=map[key]||[];
+    if(dayAnalises.length) d.classList.add('has-sched');
+    let html='<div class="cal-day-num">'+day+'</div>';
+    if(dayAnalises.length) {
+      dayAnalises.slice(0,2).forEach(a=>{
+        const tc=a.status==='confirmado'?'confirmado':a.status==='recusado'?'recusado':'pendente';
+        const hr=extractHour(a);
+        html+='<div class="cal-badge '+tc+'">'+(hr?hr+' ':'')+(a.nome.split(' ')[0])+'</div>';
+      });
+      if(dayAnalises.length>2) html+='<div class="cal-badge" style="background:#888">+'+( dayAnalises.length-2)+'</div>';
+    }
+    d.innerHTML=html;
+    d.onclick=()=>showDayDetail(key,dayAnalises);
+    grid.appendChild(d);
+  }
+  // Fill remaining cells
+  const total=firstDay+daysInMonth; const remaining=(7-total%7)%7;
+  for(let i=1;i<=remaining;i++) {
+    const d=document.createElement('div'); d.className='cal-day other-month';
+    d.innerHTML='<div class="cal-day-num">'+i+'</div>'; grid.appendChild(d);
+  }
+  document.getElementById('cal-day-detail').style.display='none';
+}
+
+function extractDateKey(a) {
+  // 1. Data editada manualmente pelo admin tem prioridade
+  if(a.editedDate) return a.editedDate;
+  // 2. Data real de comparecimento escolhida pelo cliente (campo scheduleDate)
+  if(a.scheduleDate) return a.scheduleDate;
+  // 3. Tenta extrair da string de agendamento (formatos YYYY-MM-DD ou DD/MM/YYYY)
+  const ag=a.agendamento||'';
+  let m=ag.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return m[0];
+  m=ag.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if(m) return m[3]+'-'+m[2]+'-'+m[1];
+  // 4. NÃO usa timestamp como fallback — evita mostrar na data de cadastro
+  //    (timestamp = data da análise online, não do comparecimento)
+  return null;
+}
+function extractHour(a) {
+  if(a.editedHour) return a.editedHour;
+  const ag=a.agendamento||'';
+  const m=ag.match(/(\d{2}):(\d{2})/);
+  if(m) return m[0];
+  return '';
+}
+
+function showDayDetail(key,list) {
+  const [y,mo,dy]=key.split('-');
+  const label=parseInt(dy)+' de '+mesesPT[parseInt(mo)-1]+' de '+y;
+  document.getElementById('cal-detail-title').textContent='📅 Agendamentos — '+label;
+  const el=document.getElementById('cal-detail-list');
+  if(!list.length){el.innerHTML='<div class="empty-state" style="padding:20px">Nenhum agendamento neste dia</div>';
+  }else{
+    el.innerHTML=list.map(a=>{
+      const tc=a.status==='confirmado'?'confirmado':a.status==='recusado'?'recusado':'pendente';
+      const hr=extractHour(a)||'—';
+      return `<div class="sched-item ${tc}">
+        <div>
+          <div class="sched-time">🕐 ${hr}</div>
+          <div class="sched-name">${a.nome}</div>
+          <div style="font-size:11px;color:#888">${a.wpp} · ${fmtBRL(a.limite)}</div>
+          <div style="font-size:10px;margin-top:2px;color:${tc==='confirmado'?'#2E7D32':tc==='recusado'?'#C62828':'#E65100'};font-weight:700;font-family:Montserrat,sans-serif">${tc.toUpperCase()}</div>
+        </div>
+        <div class="sched-actions">
+          <button class="sched-btn edit" onclick="openEditModal(${a.id})">✏️ Editar</button>
+          <button class="sched-btn wpp" onclick="contactClient('${a.wpp}','${a.nome}','${a.agendamento}','${fmtBRL(a.limite)}')">📲</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('cal-day-detail').style.display='block';
+  document.getElementById('cal-day-detail').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ══════════════════════════════════════════════════
+// EDIT MODAL
+// ══════════════════════════════════════════════════
+let _editAnalise=null;
+
+async function openEditModal(id) {
+  const analises=await loadAnalises();
+  const a=analises.find(x=>x.id===id);
+  if(!a) return;
+  _editAnalise=a;
+  document.getElementById('em-id').value=id;
+  document.getElementById('em-nome').value=a.nome||'';
+  document.getElementById('em-wpp').value=a.wpp||'';
+  document.getElementById('em-status').value=a.status||'pendente';
+  // Set date
+  const dk=extractDateKey(a);
+  document.getElementById('em-dia').value=dk||'';
+  // Set hour
+  const hr=extractHour(a);
+  document.getElementById('em-hora').value=hr||'08:00';
+  document.getElementById('edit-modal-overlay').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal-overlay').classList.remove('open');
+  _editAnalise=null;
+}
+
+async function saveEdit() {
+  const id=parseInt(document.getElementById('em-id').value)||document.getElementById('em-id').value;
+  const nome=document.getElementById('em-nome').value.trim();
+  const wpp=document.getElementById('em-wpp').value.trim();
+  const dia=document.getElementById('em-dia').value;
+  const hora=document.getElementById('em-hora').value;
+  const status=document.getElementById('em-status').value;
+  if(!nome||!wpp){toast('⚠️ Preencha nome e WhatsApp','#C62828');return;}
+  // Build new agendamento string
+  let novoAg=_editAnalise?_editAnalise.agendamento:'';
+  if(dia&&hora) novoAg=dia+' as '+hora;
+  // Update in storage
+  if(fbReady&&db){
+    try{await db.collection('analises').doc(String(id)).update({nome,wpp,agendamento:novoAg,editedDate:dia,scheduleDate:dia,editedHour:hora,status});fbReady&&toast('✅ Salvo no Firebase','#2E7D32');}catch(e){fbLocalUpdate(id,nome,wpp,novoAg,dia,hora,status);}
+  } else { fbLocalUpdate(id,nome,wpp,novoAg,dia,hora,status); }
+  closeEditModal();
+  renderAdmin();
+  renderCalendario();
+  toast('✅ Agendamento atualizado!','#2E7D32');
+}
+
+function fbLocalUpdate(id,nome,wpp,novoAg,dia,hora,status){
+  const list=getLocalAnalises();
+  const idx=list.findIndex(a=>a.id===id);
+  if(idx>-1){list[idx]={...list[idx],nome,wpp,agendamento:novoAg,editedDate:dia,scheduleDate:dia,editedHour:hora,status};localStorage.setItem('fc_analises',JSON.stringify(list));}
+}
+
+function reenviarWpp() {
+  const nome=document.getElementById('em-nome').value.trim();
+  const wpp=document.getElementById('em-wpp').value.trim();
+  const dia=document.getElementById('em-dia').value;
+  const hora=document.getElementById('em-hora').value;
+  const limite=_editAnalise?fmtBRL(_editAnalise.limite):'—';
+  const ag=dia&&hora?dia+' às '+hora:(_editAnalise?_editAnalise.agendamento:'—');
+  const msg=encodeURIComponent('Olá '+nome.split(' ')[0]+'! Seu agendamento na Facilita Cell foi atualizado.\n\n📅 Data/Hora: '+ag+'\n💳 Limite: '+limite+'\n\nTe esperamos! 😊');
+  const url='https://wa.me/55'+wpp.replace(/\D/g,'')+'?text='+msg;
+  try{window.open(url,'_blank');}catch(e){window.location.href=url;}
+}
+
+function saveConfig() {
+  const s=getSettings();
+  s.storeName=document.getElementById('cfg-nome').value||s.storeName;
+  const np=document.getElementById('cfg-pwd').value; if(np) s.adminPwd=np;
+  s.maxAttempts=parseInt(document.getElementById('cfg-maxattempts').value)||3;
+  s.hStart=document.getElementById('cfg-hstart').value||s.hStart;
+  s.hEnd=document.getElementById('cfg-hend').value||s.hEnd;
+  s.fbApiKey=document.getElementById('cfg-fb-apikey').value;
+  s.fbProjectId=document.getElementById('cfg-fb-projectid').value;
+  s.fbAppId=document.getElementById('cfg-fb-appid').value;
+  s.fbSenderId=document.getElementById('cfg-fb-senderid').value;
+  saveSettings(s);
+  if(s.fbApiKey && s.fbProjectId) { initFirebase(); }
+  toast('✅ Configurações salvas!','#2E7D32');
+}
+function clearData() {
+  if(confirm('Apagar TODAS as análises? Esta ação não pode ser desfeita.')) {
+    localStorage.removeItem('fc_analises'); localStorage.removeItem('fc_attempts');
+    renderAdmin(); toast('Dados apagados','#E65100');
+  }
+}
+</script>
+</body>
+</html>
